@@ -2,7 +2,13 @@
 
 #include <iostream>
 #include <mysql/mysql.h>
-#include <string>
+
+#define ID 0
+#define SN 1
+#define NAME 2
+#define LEVEL 3
+#define PARENT 4
+#define RELATION 5
 
 typedef char **record; //查询记录
 
@@ -12,40 +18,40 @@ using namespace std;
 struct DataSet
 {
 public:
-    int row;         //行数
-    int column;      //列数
-    record *records; //查询记录
-
-    // c: 行数, r: 列数, rs: 查询记录
+    // c: 列数, r: 行数, rs: 查询记录
     DataSet(int c, int r, record *rs)
     {
         this->column = c;
         this->row = r;
         this->records = rs;
     }
-    ~DataSet()
-    {
-        delete this->records;
-    }
+    void PrintDataSet();
+
+public:
+    int row;         //行数
+    int column;      //列数
+    record *records; //查询记录
 };
 
-// mysql包装
+// mysql包装类
 class MySqlManager
 {
 public:
-    MySqlManager();
-    ~MySqlManager();
     // 初始化数据库连接
     bool InitDB(string host, string user, string pwd, string db_name);
     // 释放连接
     bool FreeConnect();
 
     // 执行sql, 增删改操作
-    // bool ExecuteSql(const char *sql);
+    bool ExecuteSql(const char *sql);
     // 执行查询语句
     bool QuerySql(const char *sql);
     //返回查询结果
-    DataSet* GetDataSet();
+    DataSet *GetDataSet();
+
+public:
+    MySqlManager();
+    ~MySqlManager();
 
 private:
     MYSQL *connection; //连接mysql句柄指针

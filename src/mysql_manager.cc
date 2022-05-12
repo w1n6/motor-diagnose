@@ -1,7 +1,23 @@
-#include "mysql_manager.h"
+#include "mysql_manager/mysql_manager.h"
 #include <mysql/mysql.h>
+#include <iostream>
 
 using namespace std;
+
+void DataSet::PrintDataSet()
+{
+    cout << this->row << endl;
+    cout << this->column << endl;
+    for (int i = 0; i < this->row; i++)
+    {
+        for (int j = 0; j < this->column; j++)
+        {
+            cout << this->records[i][j] << " ";
+        }
+        cout << endl;
+    }
+    return;
+}
 
 MySqlManager::MySqlManager()
 {
@@ -38,14 +54,22 @@ bool MySqlManager::InitDB(string host, string user, string pwd, string db_name)
     }
     return true;
 }
-
-bool MySqlManager::QuerySql(const char* sql)
+bool MySqlManager::ExecuteSql(const char *sql)
 {
-    if (result != nullptr)
+    if (mysql_query(connection, sql) != 0)
     {
-        // 释放结果集的内存
-        mysql_free_result(result);
+        cout << "mysql_execute error!" << endl;
+        return false;
     }
+    else
+    {
+        cout << "mysql_execute sucess!" << endl;
+        return true;
+    }
+}
+
+bool MySqlManager::QuerySql(const char *sql)
+{
     // mysql_query()执行成功返回字符串数组, 失败返回false.
     if (mysql_query(connection, sql) != 0)
     {
@@ -63,11 +87,11 @@ DataSet *MySqlManager::GetDataSet()
 {
     int r = mysql_num_rows(result);
     int c = mysql_num_fields(result);
-    record* rs = new record[r];
-    for (int i=0;i<r;++i)
-    {   
+    auto rs = new record[r];
+    for (int i = 0; i < r; ++i)
+    {
         row = mysql_fetch_row(result);
-        rs[i] = row; 
+        rs[i] = row;
     }
-    return new DataSet(mysql_num_rows(result), mysql_num_fields(result), rs);
+    return new DataSet(mysql_num_fields(result), mysql_num_rows(result), rs);
 }
